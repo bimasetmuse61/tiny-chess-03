@@ -7,8 +7,8 @@ D8=((1,0),(-1,0),(0,1),(0,-1),(1,1),(1,-1),(-1,1),(-1,-1))
 DR=[KN,D8[4:],D8[:4],D8,D8]
 CM=[15-{0:2,7:1,4:3,56:8,63:4,60:12}.get(i,0)for i in range(64)]
 B=[0]*64
-S=1;C=0;KP=[4,60]
-TT={};ND=0;TM=0;UN=[];X=TimeoutError
+S=1;C=0;KP=[0,0]
+TT={};TM=0;UN=[];HH={};X=TimeoutError
 def pf(f):
  global B,S,C
  B=[0]*64;w=f.split();i=0
@@ -37,7 +37,7 @@ def att(x,by):
    if p:
     if p*by>0:
      t=abs(p)
-     if t==5 or(t==6 and d==1)or(t==3 and df*dr)or(t==4 and not df*dr):return 1
+     if(t>4 and(t==5 or d==1))or(t==3 and df*dr)or(t==4 and not df*dr):return 1
     break
    nf+=df;nr+=dr
  return 0
@@ -91,15 +91,14 @@ def ev():
   if p:
    t=abs(p);q=i if p>0 else i^56
    c=min(i&7,7-(i&7))+min(i>>3,7-(i>>3))
-   w=(0,(0,2,0,5,12,18,50,0)[q>>3],-45+11*c,0,0,0,-6*(q>>3))[t]
+   w=(0,(0,2,0,5,12,18,50,0)[q>>3],-45+11*c,0,0,0,0)[t]
    s+=(V[t]+w)*(p>0 or-1)
- return s+30*((B.count(3)>1)-(B.count(-3)>1))
-def sc(m):v=B[(m>>6)&63];return 400000 if m==TM else 300000+abs(v)*16-abs(B[m&63]) if v else 0
+ return s
+def sc(m):v=B[(m>>6)&63];return 400000 if m==TM else 300000+abs(v)*16-abs(B[m&63]) if v else HH.get(m,0)
 def sr(d,a,b,ply):
  global ND,TM;ND+=1
- if ND>70000:raise X
+ if ND>7e4:raise X
  if d<=0:
-  TM=0
   if att(KP[S<0],-S):bt=-1e7;ms=gen(0)
   else:
    st=ev()*S
@@ -107,7 +106,7 @@ def sr(d,a,b,ply):
    if st>a:a=st
    bt=a;ms=gen(1)
  else:
-  k=(tuple(B),S);e=TT.get(k);a0=a
+  k=(tuple(B),S);e=TT.get(k)
   if e and e[0]>=d:
    v=e[1]
    if e[2]==0:return v
@@ -125,9 +124,11 @@ def sr(d,a,b,ply):
   un(m)
   if v>bt:bt=v;bmv=m
   if v>a:a=v
-  if a>=b:break
- if not n:return -100000+ply if att(KP[S<0],-S) else 0 if d>0 else bt
- if d>0:TT[k]=(d,bt,1 if bt>=b else 2 if bt<=a0 else 0,bmv)
+  if a>=b:
+   if not B[(m>>6)&63]:HH[m]=HH.get(m,0)+d
+   break
+ if not n:return ply-100000 if att(KP[S<0],-S) else 0 if d>0 else bt
+ if d>0:TT[k]=(d,bt,1 if bt>=b else 2 if bt<=a else 0,bmv)
  return bt
 def bm():
  global ND,TM
