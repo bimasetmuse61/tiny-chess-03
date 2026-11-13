@@ -97,7 +97,7 @@ def ev():
 def sc(m):v=B[(m>>6)&63];return 400000 if m==TM else 300000+abs(v)*16-abs(B[m&63]) if v else HH.get(m,0)
 def sr(d,a,b,ply):
  global ND,TM;ND+=1
- if ND>7e4:raise X
+ if ND>9e4:raise X
  if d<=0:
   if att(KP[S<0],-S):bt=-1e7;ms=gen(0)
   else:
